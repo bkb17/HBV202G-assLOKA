@@ -109,6 +109,7 @@ public class GameSceneController implements Initializable {
 
 
     private void load(){
+
         obstacles.addAll(obstaclesHandler.createObstacles());
     }
 
