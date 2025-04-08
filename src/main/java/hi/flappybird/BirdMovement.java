@@ -5,6 +5,9 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
+/**
+ * svo flott
+ */
 public class BirdMovement {
 
     private Rectangle bird;
@@ -16,6 +19,9 @@ public class BirdMovement {
         this.jumpHeight = jumpHeight;
     }
 
+    /**
+     * lika flott
+     */
     public void fly() {
         double movement = -jumpHeight;
         double currentY = bird.getLayoutY();
