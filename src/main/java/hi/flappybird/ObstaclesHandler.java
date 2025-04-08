@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+
 public class ObstaclesHandler {
 
     private AnchorPane plane;
@@ -12,12 +13,22 @@ public class ObstaclesHandler {
     private double planeWidth;
     Random random = new Random();
 
+    /**
+     * smiðurinn
+     * @param plane
+     * @param planeHeight
+     * @param planeWidth
+     */
     public ObstaclesHandler(AnchorPane plane, double planeHeight, double planeWidth) {
         this.plane = plane;
         this.planeHeight = planeHeight;
         this.planeWidth = planeWidth;
     }
 
+    /**
+     * býr til súlurnar
+     * @return
+     */
     public ArrayList<Rectangle> createObstacles(){
 
         int width = 25;
@@ -37,7 +48,10 @@ public class ObstaclesHandler {
         return new ArrayList<>(Arrays.asList(rectangleTop,rectangleBottom));
     }
 
-
+    /**
+     * færir súlurnar
+     * @param obstacles
+     */
     public void moveObstacles(ArrayList<Rectangle> obstacles){
 
         ArrayList<Rectangle> outOfScreen = new ArrayList<>();
@@ -53,6 +67,11 @@ public class ObstaclesHandler {
         plane.getChildren().removeAll(outOfScreen);
     }
 
+    /**
+     * færir súlurnar
+     * @param rectangle
+     * @param amount
+     */
     private void moveRectangle(Rectangle rectangle, double amount){
         rectangle.setX(rectangle.getX() + amount);
     }

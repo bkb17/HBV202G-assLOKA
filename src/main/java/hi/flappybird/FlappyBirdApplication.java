@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * main fall
+ */
 public class FlappyBirdApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {

@@ -14,7 +14,9 @@ import java.util.ResourceBundle;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 
-
+/**
+ * Controller fyrir leikinn sjálfan
+ */
 public class GameSceneController implements Initializable {
 
     AnimationTimer gameLoop;
@@ -47,7 +49,11 @@ public class GameSceneController implements Initializable {
 
     ArrayList<Rectangle> obstacles = new ArrayList<>();
 
-
+    /**
+     * initialize
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -72,6 +78,10 @@ public class GameSceneController implements Initializable {
 
     }
 
+    /**
+     * lætur fuglinn fljúga þegar ýtt er á space
+     * @param event
+     */
     @FXML
     void pressed(KeyEvent event) {
         if(event.getCode() == KeyCode.SPACE){
@@ -80,7 +90,9 @@ public class GameSceneController implements Initializable {
         }
     }
 
-
+    /**
+     * breytir position á fulginum
+     */
     private void update() {
         gameTime++;
         accelerationTime++;
