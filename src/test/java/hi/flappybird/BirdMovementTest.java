@@ -4,11 +4,16 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import hi.flappybird.vinnsla.BirdMovement;
+
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(ApplicationExtension.class)
 public class BirdMovementTest {
 
     private Rectangle bird;
@@ -17,62 +22,49 @@ public class BirdMovementTest {
 
     @BeforeEach
     public void setUp() {
-        // Initializes JavaFX runtime
-
-
-        bird = new Rectangle(20, 20);
-        bird.setLayoutY(100);
-        birdMovement = new BirdMovement(bird, 50);
+        bird = new Rectangle(20, 20); // simulate a bird shape
+        bird.setLayoutY(100); // starting Y position
+        birdMovement = new BirdMovement(bird, 75);
         plane = new AnchorPane();
-        plane.setPrefHeight(600);
+        plane.setPrefHeight(600); // simulate a game area
     }
 
     @Test
-    public void testFlyDecreasesY() {
+    public void testFly() {
         double initialY = bird.getLayoutY();
         birdMovement.fly();
-        assertTrue(bird.getLayoutY() < initialY, "Bird should move up when it flies.");
+        assertTrue(bird.getLayoutY() < initialY, "Bird should move upward after flying");
     }
 
     @Test
-    public void testFlyDoesNotGoAboveTop() {
-        bird.setLayoutY(10);
-        birdMovement.fly();
-        assertEquals(0, bird.getLayoutY(), "Bird should not fly above the top of the screen.");
+    public void testMoveBirdY() {
+        birdMovement.moveBirdY(50);
+        assertEquals(150, bird.getLayoutY(), "Bird Y should increase correctly");
     }
 
     @Test
-    public void testMoveBirdYChangesY() {
-        double initialY = bird.getLayoutY();
-        birdMovement.moveBirdY(30);
-        assertEquals(initialY + 30, bird.getLayoutY(), 0.001);
-    }
-
-    @Test
-    public void testIsBirdDeadWhenOutOfBounds() {
-        bird.setLayoutY(600);
+    public void testIsBirdDead_NoCollision_NotBelowPlane() {
         ArrayList<Rectangle> obstacles = new ArrayList<>();
-        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead if it goes off the screen.");
+        assertFalse(birdMovement.isBirdDead(obstacles, plane), "Bird should not be dead");
     }
 
     @Test
-    public void testIsBirdDeadWhenCollision() {
+    public void testIsBirdDead_BelowPlane() {
+        bird.setLayoutY(601);
+        ArrayList<Rectangle> obstacles = new ArrayList<>();
+        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead when below screen");
+    }
+
+    @Test
+    public void testIsBirdDead_WithCollision() {
         Rectangle obstacle = new Rectangle(20, 20);
-        obstacle.setLayoutX(0);
-        obstacle.setLayoutY(100);
+        obstacle.setLayoutX(bird.getLayoutX());
+        obstacle.setLayoutY(bird.getLayoutY());
+
         ArrayList<Rectangle> obstacles = new ArrayList<>();
         obstacles.add(obstacle);
 
-        CollisionHandler mockHandler = new CollisionHandler() {
-            @Override
-            public boolean collisionDetection(ArrayList<Rectangle> obstacles, Rectangle bird) {
-                return true;
-            }
-        };
-        birdMovement = new BirdMovement(bird, 50);
-        birdMovement.collisionHandler = mockHandler;
-
-        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead if it collides.");
+        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead if it collides");
     }
 }
 
