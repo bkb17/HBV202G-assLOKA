@@ -1,10 +1,14 @@
-package hi.flappybird;
+package hi.flappybird.vidmot;
+import hi.flappybird.vinnsla.BirdMovement;
+import hi.flappybird.vinnsla.ObstaclesHandler;
+import hi.flappybird.vinnsla.SelectedBird;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.TextField;
 import javafx.application.Platform;
@@ -14,9 +18,7 @@ import java.util.ResourceBundle;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 
-/**
- * Controller fyrir leikinn sjálfan
- */
+
 public class GameSceneController implements Initializable {
 
     AnimationTimer gameLoop;
@@ -25,10 +27,10 @@ public class GameSceneController implements Initializable {
     private AnchorPane plane;
 
     @FXML
-    private Rectangle bird;
+    private Label gameOverLabel;
 
     @FXML
-    private Label gameOverLabel;
+    private Rectangle bird;
 
     @FXML
     private Button restartButton;
@@ -50,12 +52,18 @@ public class GameSceneController implements Initializable {
     ArrayList<Rectangle> obstacles = new ArrayList<>();
 
     /**
-     * initialize
      * @param url
      * @param resourceBundle
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        String selected = SelectedBird.getSelectedBird();
+
+        if ("blue".equals(selected)) {
+            bird.setFill(Color.BLUE);
+        } else {
+            bird.setFill(Color.PINK);
+        }
 
         int jumpHeight = 75;
         birdComponent = new BirdMovement(bird, jumpHeight);
@@ -90,9 +98,7 @@ public class GameSceneController implements Initializable {
         }
     }
 
-    /**
-     * breytir position á fulginum
-     */
+
     private void update() {
         gameTime++;
         accelerationTime++;
@@ -189,6 +195,7 @@ public class GameSceneController implements Initializable {
 
         return false;
     }
+
 }
 
 

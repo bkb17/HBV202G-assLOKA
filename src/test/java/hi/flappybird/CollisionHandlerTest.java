@@ -1,5 +1,6 @@
 package hi.flappybird;
 
+import hi.flappybird.vinnsla.CollisionHandler;
 import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
