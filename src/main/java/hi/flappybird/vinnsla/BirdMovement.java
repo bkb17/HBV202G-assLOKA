@@ -1,13 +1,10 @@
-package hi.flappybird;
+package hi.flappybird.vinnsla;
 
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
-/**
- * klasi sem lætur fuglinn fljúga
- */
 public class BirdMovement {
 
     private Rectangle bird;
@@ -15,7 +12,6 @@ public class BirdMovement {
     CollisionHandler collisionHandler = new CollisionHandler();
 
     /**
-     * smiðurinn
      * @param bird
      * @param jumpHeight
      */
@@ -24,9 +20,6 @@ public class BirdMovement {
         this.jumpHeight = jumpHeight;
     }
 
-    /**
-     * aðferð sem lætur fuglinn fljúga
-     */
     public void fly() {
         double movement = -jumpHeight;
         double currentY = bird.getLayoutY();
@@ -39,7 +32,6 @@ public class BirdMovement {
     }
 
     /**
-     * breytir position
      * @param positionChange
      */
     public void moveBirdY(double positionChange) {
@@ -47,7 +39,6 @@ public class BirdMovement {
     }
 
     /**
-     * athugar hvort fuglinn sé dauður
      * @param obstacles
      * @param plane
      * @return

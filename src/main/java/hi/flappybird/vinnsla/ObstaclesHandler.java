@@ -1,4 +1,4 @@
-package hi.flappybird;
+package hi.flappybird.vinnsla;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import java.util.ArrayList;

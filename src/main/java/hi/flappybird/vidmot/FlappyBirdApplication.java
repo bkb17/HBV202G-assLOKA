@@ -1,4 +1,4 @@
-package hi.flappybird;
+package hi.flappybird.vidmot;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
