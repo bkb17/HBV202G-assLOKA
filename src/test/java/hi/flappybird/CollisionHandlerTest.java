@@ -1,49 +1,74 @@
 package hi.flappybird;
-
 import hi.flappybird.vinnsla.CollisionHandler;
+import javafx.application.Platform;
 import javafx.scene.shape.Rectangle;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CollisionHandlerTest {
+public class CollisionHandlerTest {
 
-    private CollisionHandler collisionHandler;
-    private Rectangle bird;
-
-    @BeforeEach
-    void setUp() {
-
-        collisionHandler = new CollisionHandler();
-        bird = new Rectangle(20, 20);
-        bird.setLayoutX(50);
-        bird.setLayoutY(50);
+    @BeforeAll
+    public static void initFX() {
+        // Ensure JavaFX runtime is initialized
+        Platform.startup(() -> {});
     }
 
     @Test
-    void testNoCollision() {
+    public void testCollisionDetected() {
+        // Arrange
+        Rectangle bird = new Rectangle(50, 50, 30, 30); // x, y, width, height
+        Rectangle obstacle = new Rectangle(60, 50, 30, 30); // overlaps with bird
+
         ArrayList<Rectangle> obstacles = new ArrayList<>();
-        Rectangle obstacle = new Rectangle(20, 20);
-        obstacle.setLayoutX(200);
-        obstacle.setLayoutY(200); // Far from the bird
         obstacles.add(obstacle);
 
-        boolean result = collisionHandler.collisionDetection(obstacles, bird);
-        assertFalse(result, "Should return false when there's no collision.");
+        CollisionHandler handler = new CollisionHandler();
+
+        // Act
+        boolean result = handler.collisionDetection(obstacles, bird);
+
+        // Assert
+        assertTrue(result, "Collision should be detected when rectangles overlap");
     }
 
     @Test
-    void testCollisionDetected() {
+    public void testNoCollision() {
+        // Arrange
+        Rectangle bird = new Rectangle(10, 10, 30, 30);
+        Rectangle obstacle = new Rectangle(200, 200, 30, 30); // far away
+
         ArrayList<Rectangle> obstacles = new ArrayList<>();
-        Rectangle obstacle = new Rectangle(20, 20);
-        obstacle.setLayoutX(50);
-        obstacle.setLayoutY(50); // Same position as bird
         obstacles.add(obstacle);
 
-        boolean result = collisionHandler.collisionDetection(obstacles, bird);
-        assertTrue(result, "Should return true when there's a collision.");
+        CollisionHandler handler = new CollisionHandler();
+
+        // Act
+        boolean result = handler.collisionDetection(obstacles, bird);
+
+        // Assert
+        assertFalse(result, "No collision should be detected when rectangles are far apart");
+    }
+
+    @Test
+    public void testMultipleObstaclesWithOneCollision() {
+        // Arrange
+        Rectangle bird = new Rectangle(100, 100, 20, 20);
+        ArrayList<Rectangle> obstacles = new ArrayList<>();
+
+        obstacles.add(new Rectangle(10, 10, 30, 30));
+        obstacles.add(new Rectangle(200, 200, 30, 30));
+        obstacles.add(new Rectangle(100, 100, 20, 20)); // exact same position
+
+        CollisionHandler handler = new CollisionHandler();
+
+        // Act
+        boolean result = handler.collisionDetection(obstacles, bird);
+
+        // Assert
+        assertTrue(result, "Should detect collision with one of multiple obstacles");
     }
 }

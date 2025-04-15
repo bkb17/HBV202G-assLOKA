@@ -80,6 +80,7 @@ public class GameSceneController implements Initializable {
         bird.setLayoutX(50);
         birdComponent = new BirdMovement(bird, 60);
     }
+
     private void setupGame() {
         double planeHeight = 600;
         double planeWidth = 400;
@@ -182,8 +183,6 @@ public class GameSceneController implements Initializable {
             e.printStackTrace();
         }
     }
-
-
 
 
     private boolean pointChecker(ArrayList<Rectangle> obstacles, Rectangle bird) {
