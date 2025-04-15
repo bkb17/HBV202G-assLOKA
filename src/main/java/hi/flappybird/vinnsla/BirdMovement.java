@@ -1,4 +1,4 @@
-package hi.flappybird;
+package hi.flappybird.vinnsla;
 
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
@@ -11,6 +11,10 @@ public class BirdMovement {
     private int jumpHeight;
     CollisionHandler collisionHandler = new CollisionHandler();
 
+    /**
+     * @param bird
+     * @param jumpHeight
+     */
     public BirdMovement(Rectangle bird, int jumpHeight) {
         this.bird = bird;
         this.jumpHeight = jumpHeight;
@@ -27,12 +31,18 @@ public class BirdMovement {
         moveBirdY(movement);
     }
 
-
+    /**
+     * @param positionChange
+     */
     public void moveBirdY(double positionChange) {
         bird.setLayoutY(bird.getLayoutY() + positionChange);
     }
 
-
+    /**
+     * @param obstacles
+     * @param plane
+     * @return
+     */
     public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane){
         double birdY = bird.getLayoutY() + bird.getY();
 

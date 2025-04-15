@@ -1,10 +1,14 @@
-package hi.flappybird;
+package hi.flappybird.vidmot;
+import hi.flappybird.vinnsla.BirdMovement;
+import hi.flappybird.vinnsla.ObstaclesHandler;
+import hi.flappybird.vinnsla.SelectedBird;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.TextField;
 import javafx.application.Platform;
@@ -23,10 +27,10 @@ public class GameSceneController implements Initializable {
     private AnchorPane plane;
 
     @FXML
-    private Rectangle bird;
+    private Label gameOverLabel;
 
     @FXML
-    private Label gameOverLabel;
+    private Rectangle bird;
 
     @FXML
     private Button restartButton;
@@ -47,12 +51,36 @@ public class GameSceneController implements Initializable {
 
     ArrayList<Rectangle> obstacles = new ArrayList<>();
 
-
+    /**
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        String selected = SelectedBird.getSelectedBird();
 
-        int jumpHeight = 75;
-        birdComponent = new BirdMovement(bird, jumpHeight);
+        if ("blue".equals(selected)) {
+            initBlueBird();
+        } else {
+            initPinkBird();
+        }
+
+        setupGame();
+    }
+    private void initBlueBird() {
+        bird.setFill(Color.BLUE);
+        bird.setLayoutY(plane.getHeight() / 2);
+        bird.setLayoutX(50);
+        birdComponent = new BirdMovement(bird, 80);
+    }
+
+    private void initPinkBird() {
+        bird.setFill(Color.PINK);
+        bird.setLayoutY(plane.getHeight() / 2);
+        bird.setLayoutX(50);
+        birdComponent = new BirdMovement(bird, 60);
+    }
+    private void setupGame() {
         double planeHeight = 600;
         double planeWidth = 400;
         obstaclesHandler = new ObstaclesHandler(plane, planeHeight, planeWidth);
@@ -65,13 +93,19 @@ public class GameSceneController implements Initializable {
         };
 
         load();
-
         gameLoop.start();
+
         plane.setFocusTraversable(true);
         Platform.runLater(() -> plane.requestFocus());
-
     }
 
+
+
+
+    /**
+     * lætur fuglinn fljúga þegar ýtt er á space
+     * @param event
+     */
     @FXML
     void pressed(KeyEvent event) {
         if(event.getCode() == KeyCode.SPACE){
@@ -101,12 +135,7 @@ public class GameSceneController implements Initializable {
             gameOver();
         }
 
-
-
-
     }
-
-
 
     private void load(){
 
@@ -145,7 +174,7 @@ public class GameSceneController implements Initializable {
     @FXML
     private void backToMenu() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("main-menu.fxml"));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/hi/flappybird/main-menu.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) plane.getScene().getWindow();
             stage.setScene(new javafx.scene.Scene(root));
@@ -177,6 +206,7 @@ public class GameSceneController implements Initializable {
 
         return false;
     }
+
 }
 
 

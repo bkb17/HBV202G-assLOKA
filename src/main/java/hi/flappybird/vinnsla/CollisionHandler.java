@@ -1,6 +1,7 @@
-package hi.flappybird;
+package hi.flappybird.vinnsla;
 import javafx.scene.shape.Rectangle;
 import java.util.ArrayList;
+
 
 public class CollisionHandler {
     public boolean collisionDetection(ArrayList<Rectangle> obstacles , Rectangle bird){
