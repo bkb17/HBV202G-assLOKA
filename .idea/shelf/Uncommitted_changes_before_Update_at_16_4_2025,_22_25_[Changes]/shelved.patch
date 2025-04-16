@@ -1,0 +1,658 @@
+Index: src/main/java/module-info.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>module hi.flappybird {\n    requires javafx.controls;\n    requires javafx.fxml;\n    requires java.desktop;\n\n\n    opens hi.flappybird to javafx.fxml;\n    exports hi.flappybird;\n    exports hi.flappybird.vinnsla;\n    opens hi.flappybird.vinnsla to javafx.fxml;\n    exports hi.flappybird.vidmot;\n    opens hi.flappybird.vidmot to javafx.fxml;\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/module-info.java b/src/main/java/module-info.java
+--- a/src/main/java/module-info.java	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/main/java/module-info.java	(date 1744714749178)
+@@ -3,9 +3,6 @@
+     requires javafx.fxml;
+     requires java.desktop;
+ 
+-
+-    opens hi.flappybird to javafx.fxml;
+-    exports hi.flappybird;
+     exports hi.flappybird.vinnsla;
+     opens hi.flappybird.vinnsla to javafx.fxml;
+     exports hi.flappybird.vidmot;
+Index: src/main/java/hi/flappybird/vidmot/GameSceneController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package hi.flappybird.vidmot;\nimport hi.flappybird.vinnsla.BirdMovement;\nimport hi.flappybird.vinnsla.ObstaclesHandler;\nimport hi.flappybird.vinnsla.SelectedBird;\nimport javafx.animation.AnimationTimer;\nimport javafx.fxml.FXML;\nimport javafx.fxml.Initializable;\nimport javafx.scene.input.KeyCode;\nimport javafx.scene.input.KeyEvent;\nimport javafx.scene.layout.AnchorPane;\nimport javafx.scene.paint.Color;\nimport javafx.scene.shape.Rectangle;\nimport javafx.scene.control.TextField;\nimport javafx.application.Platform;\nimport java.net.URL;\nimport java.util.ArrayList;\nimport java.util.ResourceBundle;\nimport javafx.scene.control.Label;\nimport javafx.scene.control.Button;\n\n\npublic class GameSceneController implements Initializable {\n\n    AnimationTimer gameLoop;\n\n    @FXML\n    private AnchorPane plane;\n\n    @FXML\n    private Label gameOverLabel;\n\n    @FXML\n    private Rectangle bird;\n\n    @FXML\n    private Button restartButton;\n\n    @FXML\n    private Button backToMenuButton;\n\n\n    @FXML\n    private TextField score;\n\n    private double accelerationTime = 0;\n    private int gameTime = 0;\n    private int scoreCounter = 0;\n\n    private BirdMovement birdComponent;\n    private ObstaclesHandler obstaclesHandler;\n\n    ArrayList<Rectangle> obstacles = new ArrayList<>();\n\n    /**\n     * @param url\n     * @param resourceBundle\n     */\n    @Override\n    public void initialize(URL url, ResourceBundle resourceBundle) {\n        String selected = SelectedBird.getSelectedBird();\n\n        if (\"blue\".equals(selected)) {\n            initBlueBird();\n        } else {\n            initPinkBird();\n        }\n\n        setupGame();\n    }\n    private void initBlueBird() {\n        bird.setFill(Color.BLUE);\n        bird.setLayoutY(plane.getHeight() / 2);\n        bird.setLayoutX(50);\n        birdComponent = new BirdMovement(bird, 80);\n    }\n\n    private void initPinkBird() {\n        bird.setFill(Color.PINK);\n        bird.setLayoutY(plane.getHeight() / 2);\n        bird.setLayoutX(50);\n        birdComponent = new BirdMovement(bird, 60);\n    }\n    private void setupGame() {\n        double planeHeight = 600;\n        double planeWidth = 400;\n        obstaclesHandler = new ObstaclesHandler(plane, planeHeight, planeWidth);\n\n        gameLoop = new AnimationTimer() {\n            @Override\n            public void handle(long l) {\n                update();\n            }\n        };\n\n        load();\n        gameLoop.start();\n\n        plane.setFocusTraversable(true);\n        Platform.runLater(() -> plane.requestFocus());\n    }\n\n\n\n\n    /**\n     * lætur fuglinn fljúga þegar ýtt er á space\n     * @param event\n     */\n    @FXML\n    void pressed(KeyEvent event) {\n        if(event.getCode() == KeyCode.SPACE){\n            birdComponent.fly();\n            accelerationTime = 0;\n        }\n    }\n\n\n    private void update() {\n        gameTime++;\n        accelerationTime++;\n        double yDelta = 0.02;\n        birdComponent.moveBirdY(yDelta * accelerationTime);\n\n        if(pointChecker(obstacles, bird)){\n            scoreCounter++;\n            score.setText(String.valueOf(scoreCounter));\n        }\n\n        obstaclesHandler.moveObstacles(obstacles);\n        if(gameTime % 500 == 0){\n            obstacles.addAll(obstaclesHandler.createObstacles());\n        }\n\n        if(birdComponent.isBirdDead(obstacles, plane)){\n            gameOver();\n        }\n\n    }\n\n    private void load(){\n\n        obstacles.addAll(obstaclesHandler.createObstacles());\n    }\n\n    private void resetGame(){\n        bird.setY(0);\n        plane.getChildren().removeAll(obstacles);\n        obstacles.clear();\n        gameTime = 0;\n        accelerationTime = 0;\n        scoreCounter = 0;\n        score.setText(String.valueOf(scoreCounter));\n\n        load();\n\n    }\n    private void gameOver() {\n        gameLoop.stop(); //pása leikinn\n        gameOverLabel.setVisible(true);\n        restartButton.setVisible(true);\n        backToMenuButton.setVisible(true);\n    }\n    @FXML\n    private void restartGame() {\n        resetGame();\n        gameOverLabel.setVisible(false);\n        restartButton.setVisible(false);\n        backToMenuButton.setVisible(false);\n        gameLoop.start();\n\n        Platform.runLater(() -> plane.requestFocus());\n\n    }\n    @FXML\n    private void backToMenu() {\n        try {\n            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(\"/hi/flappybird/main-menu.fxml\"));\n            javafx.scene.Parent root = loader.load();\n            javafx.stage.Stage stage = (javafx.stage.Stage) plane.getScene().getWindow();\n            stage.setScene(new javafx.scene.Scene(root));\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n    }\n\n\n\n\n    private boolean pointChecker(ArrayList<Rectangle> obstacles, Rectangle bird) {\n        int birdX = (int) (bird.getLayoutX() + bird.getX());\n\n        for (Rectangle obstacle : obstacles) {\n\n            if (!Boolean.TRUE.equals(obstacle.getProperties().get(\"scoreZone\"))) continue;\n\n            int pipeRightEdge = (int) (obstacle.getLayoutX() + obstacle.getX() + obstacle.getWidth());\n\n\n            if (birdX > pipeRightEdge &&\n                    !obstacle.getProperties().containsKey(\"scored\")) {\n\n                obstacle.getProperties().put(\"scored\", true);\n                return true;\n            }\n        }\n\n        return false;\n    }\n\n}\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vidmot/GameSceneController.java b/src/main/java/hi/flappybird/vidmot/GameSceneController.java
+--- a/src/main/java/hi/flappybird/vidmot/GameSceneController.java	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/main/java/hi/flappybird/vidmot/GameSceneController.java	(date 1744841055829)
+@@ -5,6 +5,7 @@
+ import javafx.animation.AnimationTimer;
+ import javafx.fxml.FXML;
+ import javafx.fxml.Initializable;
++import javafx.scene.image.ImageView;
+ import javafx.scene.input.KeyCode;
+ import javafx.scene.input.KeyEvent;
+ import javafx.scene.layout.AnchorPane;
+@@ -17,6 +18,8 @@
+ import java.util.ResourceBundle;
+ import javafx.scene.control.Label;
+ import javafx.scene.control.Button;
++import hi.flappybird.vinnsla.BlueBird;
++import hi.flappybird.vinnsla.PinkBird;
+ 
+ 
+ public class GameSceneController implements Initializable {
+@@ -29,9 +32,6 @@
+     @FXML
+     private Label gameOverLabel;
+ 
+-    @FXML
+-    private Rectangle bird;
+-
+     @FXML
+     private Button restartButton;
+ 
+@@ -42,13 +42,19 @@
+     @FXML
+     private TextField score;
+ 
+-    private double accelerationTime = 0;
++
+     private int gameTime = 0;
+     private int scoreCounter = 0;
+-
+-    private BirdMovement birdComponent;
+     private ObstaclesHandler obstaclesHandler;
+ 
++    private BirdMovement activeBirdMovement;
++    private boolean isBlueBird = false;
++    private ImageView activeBirdShape;
++
++    private BlueBird blueBird;
++    private PinkBird pinkBird;
++
++
+     ArrayList<Rectangle> obstacles = new ArrayList<>();
+ 
+     /**
+@@ -57,29 +63,39 @@
+      */
+     @Override
+     public void initialize(URL url, ResourceBundle resourceBundle) {
++        initBirds();
++        setupGame();
++    }
++
++    private void initBirds() {
++        double startY = 300;
++        double startX = 50;
++
++        blueBird = new BlueBird(startX, startY);
++        pinkBird = new PinkBird(startX, startY);
++
+         String selected = SelectedBird.getSelectedBird();
+ 
+         if ("blue".equals(selected)) {
+-            initBlueBird();
++            isBlueBird = true;
++            activeBirdShape = blueBird.getShape();
++            activeBirdMovement = blueBird.getMovement();
++            plane.getChildren().add(blueBird.getShape());
+         } else {
+-            initPinkBird();
++            isBlueBird = false;
++            activeBirdShape = pinkBird.getShape();
++            activeBirdMovement = pinkBird.getMovement();
++            plane.getChildren().add(pinkBird.getShape());
+         }
+-
+-        setupGame();
+     }
+-    private void initBlueBird() {
+-        bird.setFill(Color.BLUE);
+-        bird.setLayoutY(plane.getHeight() / 2);
+-        bird.setLayoutX(50);
+-        birdComponent = new BirdMovement(bird, 80);
+-    }
++
++
+ 
+-    private void initPinkBird() {
+-        bird.setFill(Color.PINK);
+-        bird.setLayoutY(plane.getHeight() / 2);
+-        bird.setLayoutX(50);
+-        birdComponent = new BirdMovement(bird, 60);
++    private ImageView getActiveBird() {
++        return activeBirdShape;
+     }
++
++
+     private void setupGame() {
+         double planeHeight = 600;
+         double planeWidth = 400;
+@@ -95,12 +111,15 @@
+         load();
+         gameLoop.start();
+ 
++        plane.setOnKeyPressed(this::pressed);
++
+         plane.setFocusTraversable(true);
+         Platform.runLater(() -> plane.requestFocus());
+-    }
+-
+-
+ 
++        Platform.runLater(() -> {
++            plane.requestFocus();
++        });
++    }
+ 
+     /**
+      * lætur fuglinn fljúga þegar ýtt er á space
+@@ -108,52 +127,62 @@
+      */
+     @FXML
+     void pressed(KeyEvent event) {
+-        if(event.getCode() == KeyCode.SPACE){
+-            birdComponent.fly();
+-            accelerationTime = 0;
++        if (event.getCode() == KeyCode.SPACE) {
++            activeBirdMovement.fly();
+         }
+     }
++
+ 
+ 
+     private void update() {
+         gameTime++;
+-        accelerationTime++;
+-        double yDelta = 0.02;
+-        birdComponent.moveBirdY(yDelta * accelerationTime);
++
++        if (isBlueBird) {
++            activeBirdMovement.applyGravity();
++        } else {
++
++            double yDelta = 0.02;
++            activeBirdMovement.applyGravity();
++        }
+ 
+-        if(pointChecker(obstacles, bird)){
++        if (pointChecker(obstacles, getActiveBird())) {
+             scoreCounter++;
+             score.setText(String.valueOf(scoreCounter));
+         }
+ 
+         obstaclesHandler.moveObstacles(obstacles);
+-        if(gameTime % 500 == 0){
++
++        if (gameTime % 500 == 0) {
+             obstacles.addAll(obstaclesHandler.createObstacles());
+         }
+ 
+-        if(birdComponent.isBirdDead(obstacles, plane)){
++        if (activeBirdMovement.isBirdDead(obstacles, plane)) {
+             gameOver();
+         }
+-
+     }
+ 
+     private void load(){
+ 
+         obstacles.addAll(obstaclesHandler.createObstacles());
++        Platform.runLater(() -> plane.requestFocus());
++
+     }
+ 
+-    private void resetGame(){
+-        bird.setY(0);
++    private void resetGame() {
++        double startY = plane.getHeight() / 2;
++
++        pinkBird.getShape().setLayoutY(300);
++        blueBird.getShape().setLayoutY(300);
++
+         plane.getChildren().removeAll(obstacles);
+         obstacles.clear();
+         gameTime = 0;
+-        accelerationTime = 0;
+         scoreCounter = 0;
+         score.setText(String.valueOf(scoreCounter));
+ 
+         load();
+-
+     }
++
+     private void gameOver() {
+         gameLoop.stop(); //pása leikinn
+         gameOverLabel.setVisible(true);
+@@ -183,10 +212,7 @@
+         }
+     }
+ 
+-
+-
+-
+-    private boolean pointChecker(ArrayList<Rectangle> obstacles, Rectangle bird) {
++    private boolean pointChecker(ArrayList<Rectangle> obstacles, ImageView bird) {
+         int birdX = (int) (bird.getLayoutX() + bird.getX());
+ 
+         for (Rectangle obstacle : obstacles) {
+Index: src/main/java/hi/flappybird/vinnsla/CollisionHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package hi.flappybird.vinnsla;\nimport javafx.scene.shape.Rectangle;\nimport java.util.ArrayList;\n\n\npublic class CollisionHandler {\n    public boolean collisionDetection(ArrayList<Rectangle> obstacles , Rectangle bird){\n        for (Rectangle rectangle: obstacles) {\n            if(rectangle.getBoundsInParent().intersects(bird.getBoundsInParent())){\n                return true;\n            }\n        }\n        return  false;\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java b/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java
+--- a/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java	(date 1744838704500)
+@@ -1,10 +1,12 @@
+ package hi.flappybird.vinnsla;
+ import javafx.scene.shape.Rectangle;
+ import java.util.ArrayList;
++import javafx.scene.image.ImageView;
+ 
+ 
+ public class CollisionHandler {
+-    public boolean collisionDetection(ArrayList<Rectangle> obstacles , Rectangle bird){
++
++    public boolean collisionDetection(ArrayList<Rectangle> obstacles, ImageView bird) {
+         for (Rectangle rectangle: obstacles) {
+             if(rectangle.getBoundsInParent().intersects(bird.getBoundsInParent())){
+                 return true;
+Index: src/main/java/hi/flappybird/vinnsla/BirdMovement.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package hi.flappybird.vinnsla;\n\nimport javafx.scene.layout.AnchorPane;\nimport javafx.scene.shape.Rectangle;\n\nimport java.util.ArrayList;\n\npublic class BirdMovement {\n\n    private Rectangle bird;\n    private int jumpHeight;\n    CollisionHandler collisionHandler = new CollisionHandler();\n\n    /**\n     * @param bird\n     * @param jumpHeight\n     */\n    public BirdMovement(Rectangle bird, int jumpHeight) {\n        this.bird = bird;\n        this.jumpHeight = jumpHeight;\n    }\n\n    public void fly() {\n        double movement = -jumpHeight;\n        double currentY = bird.getLayoutY();\n\n        if (currentY <= jumpHeight) {\n            movement = -currentY;\n        }\n\n        moveBirdY(movement);\n    }\n\n    /**\n     * @param positionChange\n     */\n    public void moveBirdY(double positionChange) {\n        bird.setLayoutY(bird.getLayoutY() + positionChange);\n    }\n\n    /**\n     * @param obstacles\n     * @param plane\n     * @return\n     */\n    public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane){\n        double birdY = bird.getLayoutY() + bird.getY();\n\n        if(collisionHandler.collisionDetection(obstacles, bird)){\n            return  true;\n        }\n\n        return birdY >= plane.getHeight();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vinnsla/BirdMovement.java b/src/main/java/hi/flappybird/vinnsla/BirdMovement.java
+--- a/src/main/java/hi/flappybird/vinnsla/BirdMovement.java	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/main/java/hi/flappybird/vinnsla/BirdMovement.java	(date 1744838768870)
+@@ -1,55 +1,42 @@
+ package hi.flappybird.vinnsla;
+ 
++import javafx.scene.image.ImageView;
+ import javafx.scene.layout.AnchorPane;
+ import javafx.scene.shape.Rectangle;
+-
+ import java.util.ArrayList;
++import hi.flappybird.vinnsla.CollisionHandler;
++
+ 
+ public class BirdMovement {
++    private ImageView bird;
++    private SpeedStrategy speedStrategy;
++    private double velocity = 0;
++    private CollisionHandler collisionHandler = new CollisionHandler();
+ 
+-    private Rectangle bird;
+-    private int jumpHeight;
+-    CollisionHandler collisionHandler = new CollisionHandler();
+-
+-    /**
+-     * @param bird
+-     * @param jumpHeight
+-     */
+-    public BirdMovement(Rectangle bird, int jumpHeight) {
++    public BirdMovement(ImageView bird, SpeedStrategy speedStrategy) {
+         this.bird = bird;
+-        this.jumpHeight = jumpHeight;
++        this.speedStrategy = speedStrategy;
+     }
+ 
+     public void fly() {
+-        double movement = -jumpHeight;
+-        double currentY = bird.getLayoutY();
+-
+-        if (currentY <= jumpHeight) {
+-            movement = -currentY;
+-        }
++        velocity = -speedStrategy.getJumpHeight();
++    }
+ 
+-        moveBirdY(movement);
++    public void applyGravity() {
++        velocity += speedStrategy.getGravity();
++        bird.setLayoutY(bird.getLayoutY() + velocity);
+     }
+ 
+-    /**
+-     * @param positionChange
+-     */
+-    public void moveBirdY(double positionChange) {
+-        bird.setLayoutY(bird.getLayoutY() + positionChange);
++    public void moveBirdY(double delta) {
++        bird.setLayoutY(bird.getLayoutY() + delta);
+     }
+ 
+-    /**
+-     * @param obstacles
+-     * @param plane
+-     * @return
+-     */
+-    public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane){
+-        double birdY = bird.getLayoutY() + bird.getY();
+-
+-        if(collisionHandler.collisionDetection(obstacles, bird)){
+-            return  true;
++    public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane) {
++        double birdY = bird.getLayoutY();
++        if (collisionHandler.collisionDetection(obstacles, bird)) {
++            return true;
+         }
+-
+         return birdY >= plane.getHeight();
+     }
+ }
++
+Index: src/main/resources/hi/flappybird/game-scene.fxml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<?import javafx.scene.control.*?>\n<?import javafx.scene.layout.*?>\n<?import javafx.scene.shape.*?>\n<?import javafx.scene.text.*?>\n\n<AnchorPane fx:id=\"plane\" onKeyPressed=\"#pressed\" prefHeight=\"584.0\" prefWidth=\"450.0\" xmlns=\"http://javafx.com/javafx/17.0.12\" xmlns:fx=\"http://javafx.com/fxml/1\" fx:controller=\"hi.flappybird.vidmot.GameSceneController\">\n   <children>\n      <Rectangle fx:id=\"bird\" arcHeight=\"5.0\" arcWidth=\"5.0\" fill=\"DODGERBLUE\"\n                 height=\"40.0\" layoutX=\"205.0\" layoutY=\"180.0\"\n                 stroke=\"BLACK\" strokeType=\"INSIDE\" width=\"40.0\" />\n\n      <TextField fx:id=\"score\" editable=\"false\" focusTraversable=\"false\" alignment=\"CENTER\" layoutX=\"186.0\" layoutY=\"35.0\" prefHeight=\"66.0\" prefWidth=\"78.0\" text=\"0\">\n         <font>\n            <Font size=\"35.0\" />\n         </font>\n      </TextField>\n      <Label fx:id=\"gameOverLabel\" text=\"GAME OVER\"\n             layoutX=\"120.0\" layoutY=\"220.0\"\n             visible=\"false\"\n             textFill=\"red\"\n             style=\"-fx-font-size: 36px; -fx-font-weight: bold;\" />\n\n      <Button fx:id=\"restartButton\" text=\"RESTART\"\n              layoutX=\"165.0\" layoutY=\"280.0\"\n              prefWidth=\"120\"\n              onAction=\"#restartGame\"\n              visible=\"false\" />\n\n      <Button fx:id=\"backToMenuButton\" text=\"BACK TO MENU\"\n              layoutX=\"165.0\" layoutY=\"310.0\"\n              prefWidth=\"120\"\n              onAction=\"#backToMenu\"\n              visible=\"false\" />\n\n   </children>\n</AnchorPane>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/hi/flappybird/game-scene.fxml b/src/main/resources/hi/flappybird/game-scene.fxml
+--- a/src/main/resources/hi/flappybird/game-scene.fxml	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/main/resources/hi/flappybird/game-scene.fxml	(date 1744840996942)
+@@ -2,15 +2,10 @@
+ 
+ <?import javafx.scene.control.*?>
+ <?import javafx.scene.layout.*?>
+-<?import javafx.scene.shape.*?>
+ <?import javafx.scene.text.*?>
+ 
+ <AnchorPane fx:id="plane" onKeyPressed="#pressed" prefHeight="584.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hi.flappybird.vidmot.GameSceneController">
+    <children>
+-      <Rectangle fx:id="bird" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE"
+-                 height="40.0" layoutX="205.0" layoutY="180.0"
+-                 stroke="BLACK" strokeType="INSIDE" width="40.0" />
+-
+       <TextField fx:id="score" editable="false" focusTraversable="false" alignment="CENTER" layoutX="186.0" layoutY="35.0" prefHeight="66.0" prefWidth="78.0" text="0">
+          <font>
+             <Font size="35.0" />
+Index: src/test/java/hi/flappybird/BirdMovementTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package hi.flappybird;\n\nimport javafx.scene.layout.AnchorPane;\nimport javafx.scene.shape.Rectangle;\nimport org.junit.jupiter.api.BeforeEach;\nimport org.junit.jupiter.api.Test;\nimport org.testfx.framework.junit5.ApplicationExtension;\nimport org.junit.jupiter.api.extension.ExtendWith;\nimport hi.flappybird.vinnsla.BirdMovement;\n\n\nimport java.util.ArrayList;\n\nimport static org.junit.jupiter.api.Assertions.*;\n\n@ExtendWith(ApplicationExtension.class)\npublic class BirdMovementTest {\n\n    private Rectangle bird;\n    private BirdMovement birdMovement;\n    private AnchorPane plane;\n\n    @BeforeEach\n    public void setUp() {\n        bird = new Rectangle(20, 20); // simulate a bird shape\n        bird.setLayoutY(100); // starting Y position\n        birdMovement = new BirdMovement(bird, 75);\n        plane = new AnchorPane();\n        plane.setPrefHeight(600); // simulate a game area\n    }\n\n    @Test\n    public void testFly() {\n        double initialY = bird.getLayoutY();\n        birdMovement.fly();\n        assertTrue(bird.getLayoutY() < initialY, \"Bird should move upward after flying\");\n    }\n\n    @Test\n    public void testMoveBirdY() {\n        birdMovement.moveBirdY(50);\n        assertEquals(150, bird.getLayoutY(), \"Bird Y should increase correctly\");\n    }\n\n    @Test\n    public void testIsBirdDead_NoCollision_NotBelowPlane() {\n        ArrayList<Rectangle> obstacles = new ArrayList<>();\n        assertFalse(birdMovement.isBirdDead(obstacles, plane), \"Bird should not be dead\");\n    }\n\n    @Test\n    public void testIsBirdDead_BelowPlane() {\n        bird.setLayoutY(601);\n        ArrayList<Rectangle> obstacles = new ArrayList<>();\n        assertTrue(birdMovement.isBirdDead(obstacles, plane), \"Bird should be dead when below screen\");\n    }\n\n    @Test\n    public void testIsBirdDead_WithCollision() {\n        Rectangle obstacle = new Rectangle(20, 20);\n        obstacle.setLayoutX(bird.getLayoutX());\n        obstacle.setLayoutY(bird.getLayoutY());\n\n        ArrayList<Rectangle> obstacles = new ArrayList<>();\n        obstacles.add(obstacle);\n\n        assertTrue(birdMovement.isBirdDead(obstacles, plane), \"Bird should be dead if it collides\");\n    }\n}\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/hi/flappybird/BirdMovementTest.java b/src/test/java/hi/flappybird/BirdMovementTest.java
+--- a/src/test/java/hi/flappybird/BirdMovementTest.java	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/src/test/java/hi/flappybird/BirdMovementTest.java	(date 1744839845190)
+@@ -1,13 +1,15 @@
+ package hi.flappybird;
+ 
++import hi.flappybird.vinnsla.BirdMovement;
++import hi.flappybird.vinnsla.NormalSpeedStrategy;
+ import javafx.scene.layout.AnchorPane;
+ import javafx.scene.shape.Rectangle;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+-import org.testfx.framework.junit5.ApplicationExtension;
+ import org.junit.jupiter.api.extension.ExtendWith;
+-import hi.flappybird.vinnsla.BirdMovement;
+-
++import org.testfx.framework.junit5.ApplicationExtension;
++import javafx.scene.image.Image;
++import javafx.scene.image.ImageView;
+ 
+ import java.util.ArrayList;
+ 
+@@ -16,17 +18,19 @@
+ @ExtendWith(ApplicationExtension.class)
+ public class BirdMovementTest {
+ 
+-    private Rectangle bird;
++    private ImageView bird;
+     private BirdMovement birdMovement;
+     private AnchorPane plane;
+ 
+     @BeforeEach
+     public void setUp() {
+-        bird = new Rectangle(20, 20); // simulate a bird shape
+-        bird.setLayoutY(100); // starting Y position
+-        birdMovement = new BirdMovement(bird, 75);
++        bird = new ImageView();
++        bird.setFitWidth(34);
++        bird.setFitHeight(24);
++        bird.setLayoutY(100);
++        birdMovement = new BirdMovement(bird, new NormalSpeedStrategy());
+         plane = new AnchorPane();
+-        plane.setPrefHeight(600); // simulate a game area
++        plane.setPrefHeight(600);
+     }
+ 
+     @Test
+@@ -68,3 +72,4 @@
+     }
+ }
+ 
++
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"ee3e66a9-e297-4348-8b2a-c256709ccca6\" name=\"Changes\" comment=\"bætti við dependency org.testfx\">\n      <change afterPath=\"$PROJECT_DIR$/LICENCE\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/README.md\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/BirdSelectionController.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/Bird.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BlueBird.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/PinkBird.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/SelectedBird.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/bird-selection.fxml\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/site/markdown/UML.png\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/site/markdown/design.md\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/site/resources/UML.png\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/site/site.xml\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/BirdTest.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/BlueBirdTest.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/PinkBirdTest.java\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/SelectedBirdTest.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/Bird.java\" beforeDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/BirdMovement.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BirdMovement.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/CollisionHandler.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/FlappyBirdApplication.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/FlappyBirdApplication.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/GameSceneController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/GameSceneController.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/MainMenuController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/MainMenuController.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/ObstaclesHandler.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/ObstaclesHandler.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/hi/flappybird/Sound.java\" beforeDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/module-info.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/module-info.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/birds-view.fxml\" beforeDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/game-scene.fxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/game-scene.fxml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/main-menu.fxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/hi/flappybird/main-menu.fxml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/CollisionHandlerTest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/CollisionHandlerTest.java\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/ObstaclesHandlerTest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/test/java/hi/flappybird/ObstaclesHandlerTest.java\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"FileTemplateManagerImpl\">\n    <option name=\"RECENT_TEMPLATES\">\n      <list>\n        <option value=\"FxmlFile\" />\n        <option value=\"Class\" />\n      </list>\n    </option>\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"GitHubPullRequestSearchHistory\">{\n  &quot;lastFilter&quot;: {\n    &quot;state&quot;: &quot;OPEN&quot;,\n    &quot;assignee&quot;: &quot;bkb17&quot;\n  }\n}</component>\n  <component name=\"GithubPullRequestsUISettings\">{\n  &quot;selectedUrlAndAccountId&quot;: {\n    &quot;url&quot;: &quot;git@github.com:bkb17/HBV202G-assLOKA.git&quot;,\n    &quot;accountId&quot;: &quot;d370a354-2f6f-42d9-afe3-0bfd9a01b9dc&quot;\n  }\n}</component>\n  <component name=\"MavenImportPreferences\">\n    <option name=\"generalSettings\">\n      <MavenGeneralSettings>\n        <option name=\"mavenHomeTypeForPersistence\" value=\"WRAPPER\" />\n      </MavenGeneralSettings>\n    </option>\n  </component>\n  <component name=\"ProblemsViewState\">\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\n  </component>\n  <component name=\"ProjectColorInfo\">{\n  &quot;associatedIndex&quot;: 3\n}</component>\n  <component name=\"ProjectId\" id=\"2uX8NCBHbMX4Q2Vb9HELxLoqQgg\" />\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"Application.FlappyBirdApplication.executor\": \"Run\",\n    \"JUnit.BirdMovementTest.executor\": \"Run\",\n    \"JUnit.CollisionHandlerTest.executor\": \"Run\",\n    \"JUnit.ObstaclesHandlerTest.executor\": \"Run\",\n    \"Maven.flappybird [org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile].executor\": \"Run\",\n    \"Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor\": \"Run\",\n    \"Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:run].executor\": \"Run\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"RunOnceActivity.git.unshallow\": \"true\",\n    \"git-widget-placeholder\": \"main\",\n    \"kotlin-language-version-configured\": \"true\",\n    \"last_opened_file_path\": \"/Users/irisanna/IdeaProjects/HBV202G-assLOKA\",\n    \"node.js.detected.package.eslint\": \"true\",\n    \"node.js.detected.package.tslint\": \"true\",\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\n    \"nodejs_package_manager_path\": \"npm\",\n    \"settings.editor.selected.configurable\": \"preferences.pluginManager\",\n    \"vue.rearranger.settings.migration\": \"true\"\n  }\n}]]></component>\n  <component name=\"RunManager\" selected=\"JUnit.ObstaclesHandlerTest\">\n    <configuration name=\"FlappyBirdApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\n      <option name=\"MAIN_CLASS_NAME\" value=\"hi.flappybird.FlappyBirdApplication\" />\n      <module name=\"flappybird\" />\n      <extension name=\"coverage\">\n        <pattern>\n          <option name=\"PATTERN\" value=\"hi.flappybird.*\" />\n          <option name=\"ENABLED\" value=\"true\" />\n        </pattern>\n      </extension>\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"BirdMovementTest\" type=\"JUnit\" factoryName=\"JUnit\" temporary=\"true\" nameIsGenerated=\"true\">\n      <module name=\"flappybird\" />\n      <extension name=\"coverage\">\n        <pattern>\n          <option name=\"PATTERN\" value=\"hi.flappybird.*\" />\n          <option name=\"ENABLED\" value=\"true\" />\n        </pattern>\n      </extension>\n      <option name=\"PACKAGE_NAME\" value=\"hi.flappybird\" />\n      <option name=\"MAIN_CLASS_NAME\" value=\"hi.flappybird.BirdMovementTest\" />\n      <option name=\"TEST_OBJECT\" value=\"class\" />\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"CollisionHandlerTest\" type=\"JUnit\" factoryName=\"JUnit\" temporary=\"true\" nameIsGenerated=\"true\">\n      <module name=\"flappybird\" />\n      <extension name=\"coverage\">\n        <pattern>\n          <option name=\"PATTERN\" value=\"hi.flappybird.*\" />\n          <option name=\"ENABLED\" value=\"true\" />\n        </pattern>\n      </extension>\n      <option name=\"PACKAGE_NAME\" value=\"hi.flappybird\" />\n      <option name=\"MAIN_CLASS_NAME\" value=\"hi.flappybird.CollisionHandlerTest\" />\n      <option name=\"TEST_OBJECT\" value=\"class\" />\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"ObstaclesHandlerTest\" type=\"JUnit\" factoryName=\"JUnit\" temporary=\"true\" nameIsGenerated=\"true\">\n      <module name=\"flappybird\" />\n      <extension name=\"coverage\">\n        <pattern>\n          <option name=\"PATTERN\" value=\"hi.flappybird.*\" />\n          <option name=\"ENABLED\" value=\"true\" />\n        </pattern>\n      </extension>\n      <option name=\"PACKAGE_NAME\" value=\"hi.flappybird\" />\n      <option name=\"MAIN_CLASS_NAME\" value=\"hi.flappybird.ObstaclesHandlerTest\" />\n      <option name=\"TEST_OBJECT\" value=\"class\" />\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <recent_temporary>\n      <list>\n        <item itemvalue=\"JUnit.ObstaclesHandlerTest\" />\n        <item itemvalue=\"JUnit.CollisionHandlerTest\" />\n        <item itemvalue=\"JUnit.BirdMovementTest\" />\n        <item itemvalue=\"Application.FlappyBirdApplication\" />\n      </list>\n    </recent_temporary>\n  </component>\n  <component name=\"SharedIndexes\">\n    <attachedChunks>\n      <set>\n        <option value=\"bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27\" />\n        <option value=\"bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27\" />\n      </set>\n    </attachedChunks>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"ee3e66a9-e297-4348-8b2a-c256709ccca6\" name=\"Changes\" comment=\"\" />\n      <created>1742383516452</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1742383516452</updated>\n      <workItem from=\"1742383517432\" duration=\"2000\" />\n      <workItem from=\"1742548466614\" duration=\"9000\" />\n      <workItem from=\"1742551757850\" duration=\"1372000\" />\n      <workItem from=\"1742575757201\" duration=\"301000\" />\n      <workItem from=\"1742594638077\" duration=\"3994000\" />\n      <workItem from=\"1742843389082\" duration=\"1828000\" />\n      <workItem from=\"1744109996383\" duration=\"2608000\" />\n      <workItem from=\"1744478149490\" duration=\"724000\" />\n      <workItem from=\"1744479134224\" duration=\"3988000\" />\n      <workItem from=\"1744581930398\" duration=\"53000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"breytti nafninu á Application\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743419214633</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743419214633</updated>\n    </task>\n    <task id=\"LOCAL-00002\" summary=\"breytti nafninu á Application\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743419294866</created>\n      <option name=\"number\" value=\"00002\" />\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743419294866</updated>\n    </task>\n    <task id=\"LOCAL-00003\" summary=\"breytti nafninu á Application\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743419309577</created>\n      <option name=\"number\" value=\"00003\" />\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743419309577</updated>\n    </task>\n    <task id=\"LOCAL-00004\" summary=\"breytti nafninu á gameView yfir í GameSceneController\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743507670145</created>\n      <option name=\"number\" value=\"00004\" />\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743507670145</updated>\n    </task>\n    <task id=\"LOCAL-00005\" summary=\"breytti í comment á meðan við gerum demo\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743507745580</created>\n      <option name=\"number\" value=\"00005\" />\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743507745580</updated>\n    </task>\n    <task id=\"LOCAL-00006\" summary=\"breytti í comment á bird klasa meðan við gerum demo\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743507761347</created>\n      <option name=\"number\" value=\"00006\" />\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743507761347</updated>\n    </task>\n    <task id=\"LOCAL-00007\" summary=\"commita öllu sem var eftir áður en ég laga button to game (demo)\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743508701683</created>\n      <option name=\"number\" value=\"00007\" />\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743508701683</updated>\n    </task>\n    <task id=\"LOCAL-00008\" summary=\"laga Text þannig að það er ekki hægt að skrifa inn fyrir score game-scene.fxml og lagaði Anchorpane bætti við KeyPress=#pressed\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743511849548</created>\n      <option name=\"number\" value=\"00008\" />\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743511849548</updated>\n    </task>\n    <task id=\"LOCAL-00009\" summary=\"breytti öllu til að matcha við fxml\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743511885008</created>\n      <option name=\"number\" value=\"00009\" />\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743511885008</updated>\n    </task>\n    <task id=\"LOCAL-00010\" summary=\"þurfti að breyta til að matcha breytingu á fxml\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743511907545</created>\n      <option name=\"number\" value=\"00010\" />\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743511907545</updated>\n    </task>\n    <task id=\"LOCAL-00011\" summary=\"bætt við requires java.desktop;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1743512024753</created>\n      <option name=\"number\" value=\"00011\" />\n      <option name=\"presentableId\" value=\"LOCAL-00011\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1743512024754</updated>\n    </task>\n    <task id=\"LOCAL-00012\" summary=\"gerði test og þau virkuðu\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1744112601860</created>\n      <option name=\"number\" value=\"00012\" />\n      <option name=\"presentableId\" value=\"LOCAL-00012\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1744112601860</updated>\n    </task>\n    <task id=\"LOCAL-00013\" summary=\"workspace.xml\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1744478190462</created>\n      <option name=\"number\" value=\"00013\" />\n      <option name=\"presentableId\" value=\"LOCAL-00013\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1744478190462</updated>\n    </task>\n    <task id=\"LOCAL-00014\" summary=\"lagaði import\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1744488670057</created>\n      <option name=\"number\" value=\"00014\" />\n      <option name=\"presentableId\" value=\"LOCAL-00014\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1744488670057</updated>\n    </task>\n    <task id=\"LOCAL-00015\" summary=\"bætti við dependency org.testfx\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1744488763824</created>\n      <option name=\"number\" value=\"00015\" />\n      <option name=\"presentableId\" value=\"LOCAL-00015\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1744488763824</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"16\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"Vcs.Log.Tabs.Properties\">\n    <option name=\"TAB_STATES\">\n      <map>\n        <entry key=\"MAIN\">\n          <value>\n            <State />\n          </value>\n        </entry>\n      </map>\n    </option>\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"gerði eihv\" />\n    <MESSAGE value=\"breytti nafninu á Application\" />\n    <MESSAGE value=\"breytti GameView yfir í GameSceneController\" />\n    <MESSAGE value=\"breytti nafninu á gameView yfir í GameSceneController\" />\n    <MESSAGE value=\"breytti í comment á meðan við gerum demo\" />\n    <MESSAGE value=\"breytti í comment á bird klasa meðan við gerum demo\" />\n    <MESSAGE value=\"commita öllu sem var eftir áður en ég laga button to game (demo)\" />\n    <MESSAGE value=\"laga Text þannig að það er ekki hægt að skrifa inn fyrir score game-scene.fxml og lagaði Anchorpane bætti við KeyPress=#pressed\" />\n    <MESSAGE value=\"breytti öllu til að matcha við fxml\" />\n    <MESSAGE value=\"þurfti að breyta til að matcha breytingu á fxml\" />\n    <MESSAGE value=\"bætt við requires java.desktop;\" />\n    <MESSAGE value=\"gerði test og þau virkuðu\" />\n    <MESSAGE value=\"workspace.xml\" />\n    <MESSAGE value=\"lagaði import\" />\n    <MESSAGE value=\"bætti við dependency org.testfx\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"bætti við dependency org.testfx\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 47204c0aa72a01c77a90d5ff6a7d3003dcd200f2)
++++ b/.idea/workspace.xml	(date 1744839548077)
+@@ -4,38 +4,22 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="ee3e66a9-e297-4348-8b2a-c256709ccca6" name="Changes" comment="bætti við dependency org.testfx">
+-      <change afterPath="$PROJECT_DIR$/LICENCE" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/BirdSelectionController.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/Bird.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BlueBird.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/PinkBird.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/SelectedBird.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/resources/hi/flappybird/bird-selection.fxml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/site/markdown/UML.png" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/site/markdown/design.md" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/site/resources/UML.png" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/site/site.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/BirdTest.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/BlueBirdTest.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/PinkBirdTest.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/SelectedBirdTest.java" afterDir="false" />
++    <list default="true" id="ee3e66a9-e297-4348-8b2a-c256709ccca6" name="Changes" comment="">
++      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/FastSpeedStrategy.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/NormalSpeedStrategy.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/SpeedStrategy.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/resources/images/bluebird1.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/resources/images/bluebird2.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/resources/images/bluebird3.png" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/Bird.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/BirdMovement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BirdMovement.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/CollisionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/FlappyBirdApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/FlappyBirdApplication.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/GameSceneController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/GameSceneController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/MainMenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/MainMenuController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/ObstaclesHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/ObstaclesHandler.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/Sound.java" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/GameSceneController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vidmot/GameSceneController.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BirdMovement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BirdMovement.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BlueBird.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/BlueBird.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/CollisionHandler.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/PinkBird.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hi/flappybird/vinnsla/PinkBird.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/hi/flappybird/birds-view.fxml" beforeDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/resources/hi/flappybird/game-scene.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hi/flappybird/game-scene.fxml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/hi/flappybird/main-menu.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hi/flappybird/main-menu.fxml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/test/java/hi/flappybird/CollisionHandlerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/CollisionHandlerTest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/test/java/hi/flappybird/ObstaclesHandlerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/ObstaclesHandlerTest.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/test/java/hi/flappybird/BirdMovementTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/hi/flappybird/BirdMovementTest.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -84,29 +68,34 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "Application.FlappyBirdApplication.executor": "Run",
+-    "JUnit.BirdMovementTest.executor": "Run",
+-    "JUnit.CollisionHandlerTest.executor": "Run",
+-    "JUnit.ObstaclesHandlerTest.executor": "Run",
+-    "Maven.flappybird [org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile].executor": "Run",
+-    "Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor": "Run",
+-    "Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.git.unshallow": "true",
+-    "git-widget-placeholder": "main",
+-    "kotlin-language-version-configured": "true",
+-    "last_opened_file_path": "/Users/irisanna/IdeaProjects/HBV202G-assLOKA",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "settings.editor.selected.configurable": "preferences.pluginManager",
+-    "vue.rearranger.settings.migration": "true"
+-  }
+-}]]></component>
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;Application.FlappyBirdApplication.executor&quot;: &quot;Run&quot;,
++    &quot;JUnit.BirdMovementTest.executor&quot;: &quot;Run&quot;,
++    &quot;JUnit.CollisionHandlerTest.executor&quot;: &quot;Run&quot;,
++    &quot;JUnit.ObstaclesHandlerTest.executor&quot;: &quot;Run&quot;,
++    &quot;Maven.flappybird [org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile].executor&quot;: &quot;Run&quot;,
++    &quot;Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor&quot;: &quot;Run&quot;,
++    &quot;Maven.flappybird [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
++    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
++    &quot;last_opened_file_path&quot;: &quot;/Users/irisanna/IdeaProjects/HBV202G-assLOKA&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
++  }
++}</component>
++  <component name="RecentsManager">
++    <key name="MoveFile.RECENT_KEYS">
++      <recent name="$PROJECT_DIR$/src/main/resources/images" />
++    </key>
++  </component>
+   <component name="RunManager" selected="JUnit.ObstaclesHandlerTest">
+     <configuration name="FlappyBirdApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="hi.flappybird.FlappyBirdApplication" />
+@@ -201,6 +190,8 @@
+       <workItem from="1744478149490" duration="724000" />
+       <workItem from="1744479134224" duration="3988000" />
+       <workItem from="1744581930398" duration="53000" />
++      <workItem from="1744712338546" duration="7019000" />
++      <workItem from="1744763202801" duration="4294000" />
+     </task>
+     <task id="LOCAL-00001" summary="breytti nafninu á Application">
+       <option name="closed" value="true" />
+@@ -322,7 +313,15 @@
+       <option name="project" value="LOCAL" />
+       <updated>1744488763824</updated>
+     </task>
+-    <option name="localTasksCounter" value="16" />
++    <task id="LOCAL-00016" summary="bæta birds">
++      <option name="closed" value="true" />
++      <created>1744712457026</created>
++      <option name="number" value="00016" />
++      <option name="presentableId" value="LOCAL-00016" />
++      <option name="project" value="LOCAL" />
++      <updated>1744712457026</updated>
++    </task>
++    <option name="localTasksCounter" value="17" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -355,6 +354,7 @@
+     <MESSAGE value="workspace.xml" />
+     <MESSAGE value="lagaði import" />
+     <MESSAGE value="bætti við dependency org.testfx" />
+-    <option name="LAST_COMMIT_MESSAGE" value="bætti við dependency org.testfx" />
++    <MESSAGE value="bæta birds" />
++    <option name="LAST_COMMIT_MESSAGE" value="bæta birds" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/main/java/hi/flappybird/vinnsla/NormalSpeedStrategy.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vinnsla/NormalSpeedStrategy.java b/src/main/java/hi/flappybird/vinnsla/NormalSpeedStrategy.java
+new file mode 100644
+--- /dev/null	(date 1744840791981)
++++ b/src/main/java/hi/flappybird/vinnsla/NormalSpeedStrategy.java	(date 1744840791981)
+@@ -0,0 +1,14 @@
++package hi.flappybird.vinnsla;
++
++public class NormalSpeedStrategy implements SpeedStrategy {
++    public int getJumpHeight() {
++        return 12;
++    }
++
++    public double getGravity() {
++        return 0.5;
++    }
++}
++
++
++
+Index: src/main/java/hi/flappybird/vinnsla/SpeedStrategy.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vinnsla/SpeedStrategy.java b/src/main/java/hi/flappybird/vinnsla/SpeedStrategy.java
+new file mode 100644
+--- /dev/null	(date 1744833265338)
++++ b/src/main/java/hi/flappybird/vinnsla/SpeedStrategy.java	(date 1744833265338)
+@@ -0,0 +1,7 @@
++package hi.flappybird.vinnsla;
++
++public interface SpeedStrategy {
++    int getJumpHeight();
++    double getGravity();
++}
++
+Index: src/main/java/hi/flappybird/vinnsla/FastSpeedStrategy.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/hi/flappybird/vinnsla/FastSpeedStrategy.java b/src/main/java/hi/flappybird/vinnsla/FastSpeedStrategy.java
+new file mode 100644
+--- /dev/null	(date 1744840857247)
++++ b/src/main/java/hi/flappybird/vinnsla/FastSpeedStrategy.java	(date 1744840857247)
+@@ -0,0 +1,12 @@
++package hi.flappybird.vinnsla;
++
++public class FastSpeedStrategy implements SpeedStrategy {
++    public int getJumpHeight() {
++        return 20;
++    }
++
++    public double getGravity() {
++        return 1.2;
++    }
++}
++
