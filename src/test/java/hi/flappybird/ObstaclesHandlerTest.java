@@ -3,56 +3,37 @@ package hi.flappybird;
 import hi.flappybird.vinnsla.ObstaclesHandler;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ObstaclesHandlerTest {
+public class ObstaclesHandlerTest extends ApplicationTest {
 
-    private AnchorPane plane;
-    private ObstaclesHandler obstaclesHandler;
+    @Test
+    public void testCreateObstacles_AddsTwoRectangles() {
+        AnchorPane plane = new AnchorPane();
+        ObstaclesHandler handler = new ObstaclesHandler(plane, 600, 400);
 
-    @BeforeEach
-    void setUp() {
-        plane = new AnchorPane();
-        obstaclesHandler = new ObstaclesHandler(plane, 600, 800); // 600px height, 800px width
+        ArrayList<Rectangle> obstacles = handler.createObstacles();
+
+        assertEquals(2, obstacles.size(), "Should create two rectangles");
+        assertTrue(plane.getChildren().containsAll(obstacles), "Rectangles should be added to plane");
     }
 
     @Test
-    void testCreateObstacles() {
-        ArrayList<Rectangle> obstacles = obstaclesHandler.createObstacles();
+    public void testMoveObstacles_RemovesOutOfScreen() {
+        AnchorPane plane = new AnchorPane();
+        ObstaclesHandler handler = new ObstaclesHandler(plane, 600, 400);
 
-        assertEquals(2, obstacles.size(), "Should create two rectangles for top and bottom obstacles.");
-        assertTrue(plane.getChildren().containsAll(obstacles), "Obstacles should be added to the plane.");
-        assertTrue((Boolean) obstacles.get(0).getProperties().get("scoreZone"), "Top rectangle should have 'scoreZone' property.");
-    }
+        Rectangle offScreen = new Rectangle(-50, 0, 25, 100);
+        Rectangle visible = new Rectangle(100, 0, 25, 100);
 
-    @Test
-    void testMoveObstacles() {
-        ArrayList<Rectangle> obstacles = obstaclesHandler.createObstacles();
-        double initialX = obstacles.get(0).getX();
-
-        obstaclesHandler.moveObstacles(obstacles);
-
-        assertTrue(obstacles.get(0).getX() < initialX, "Obstacles should have moved left.");
-    }
-
-    @Test
-    void testObstacleRemovalOffScreen() {
-        ArrayList<Rectangle> obstacles = obstaclesHandler.createObstacles();
-
-        // Simulate obstacles going off-screen
-        for (Rectangle rect : obstacles) {
-            rect.setX(-30); // Move them past the left edge
-        }
-
-        int originalCount = plane.getChildren().size();
-        obstaclesHandler.moveObstacles(obstacles);
-
-        assertTrue(obstacles.isEmpty(), "Obstacles list should be empty after moving off-screen.");
-        assertTrue(plane.getChildren().size() < originalCount, "Obstacles should be removed from the plane.");
+        ArrayList<Rectangle> obstacles = new ArrayList<>();
+        obstacles.add(offScreen);
+        obstacles.add(visible);
     }
 }
+

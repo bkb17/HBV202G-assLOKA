@@ -3,6 +3,7 @@ package hi.flappybird.vinnsla;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 
+
 import java.util.ArrayList;
 
 public class BirdMovement {
@@ -44,12 +45,13 @@ public class BirdMovement {
      * @return
      */
     public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane){
-        double birdY = bird.getLayoutY() + bird.getY();
+        double birdY = bird.getBoundsInParent().getMaxY();
 
         if(collisionHandler.collisionDetection(obstacles, bird)){
             return  true;
         }
 
-        return birdY >= plane.getHeight();
+        return birdY >= (plane.getHeight() > 0 ? plane.getHeight() : plane.getPrefHeight());
+
     }
 }
