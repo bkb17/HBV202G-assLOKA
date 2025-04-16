@@ -5,6 +5,7 @@ module hi.flappybird {
 
 
     opens hi.flappybird to javafx.fxml;
+    exports hi.flappybird;
     exports hi.flappybird.vinnsla;
     opens hi.flappybird.vinnsla to javafx.fxml;
     exports hi.flappybird.vidmot;
