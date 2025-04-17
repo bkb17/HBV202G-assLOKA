@@ -11,7 +11,7 @@ target/
 *.iws
 *.iml
 *.ipr
-pom.xml
+# pom.xml
 
 ### Eclipse ###
 .apt_generated
@@ -37,3 +37,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Backup & patch files
+*.save
+*.patch
+
+# IntelliJ shelved changes
+.idea/shelf/
+
+# Shell scripts (optional - if you don't want them tracked)
+# build.sh
+# run.sh
