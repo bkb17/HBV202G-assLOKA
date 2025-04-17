@@ -22,7 +22,6 @@ public class BirdTest {
         }
     }
 
-    // Minimal subclass of abstract Bird for testing
     static class TestBird extends Bird {
         public TestBird(double startX, double startY) {
             super(startX, startY, new NormalSpeedStrategy());

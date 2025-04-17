@@ -27,10 +27,10 @@ public class BirdMovementTest {
         bird = new ImageView();
         bird.setFitWidth(34);
         bird.setFitHeight(24);
-        bird.setLayoutY(100); // starting Y position
+        bird.setLayoutY(100);
         birdMovement = new BirdMovement(bird, new NormalSpeedStrategy());
         plane = new AnchorPane();
-        plane.setPrefHeight(600); // simulate a game area
+        plane.setPrefHeight(600);
     }
 
     @Test

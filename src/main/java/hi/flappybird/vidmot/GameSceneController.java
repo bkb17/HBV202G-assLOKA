@@ -105,7 +105,7 @@ public class GameSceneController implements Initializable {
     private void update() {
         gameTime++;
 
-        birdComponent.applyGravity(); // use gravity and velocity
+        birdComponent.applyGravity();
 
         if (pointChecker(obstacles, activeBird.getShape())) {
             scoreCounter++;
@@ -141,7 +141,7 @@ public class GameSceneController implements Initializable {
 
     }
     private void gameOver() {
-        gameLoop.stop(); //pása leikinn
+        gameLoop.stop();
         gameOverLabel.setVisible(true);
         restartButton.setVisible(true);
         backToMenuButton.setVisible(true);

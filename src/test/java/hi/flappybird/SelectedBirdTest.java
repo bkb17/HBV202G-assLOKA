@@ -10,7 +10,6 @@ public class SelectedBirdTest {
 
     @AfterEach
     public void resetBird() {
-        // Ensure default value is restored after each test
         SelectedBird.setSelectedBird("pink");
     }
 
