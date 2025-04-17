@@ -1,55 +1,42 @@
 package hi.flappybird.vinnsla;
 
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
 public class BirdMovement {
 
-    private Rectangle bird;
-    private int jumpHeight;
-    CollisionHandler collisionHandler = new CollisionHandler();
+    private final ImageView bird;
+    private final int jumpHeight;
+    private final double gravity;
+    private double velocity = 0;
 
-    /**
-     * @param bird
-     * @param jumpHeight
-     */
-    public BirdMovement(Rectangle bird, int jumpHeight) {
+    private final CollisionHandler collisionHandler = new CollisionHandler();
+
+    public BirdMovement(ImageView bird, SpeedStrategy strategy) {
         this.bird = bird;
-        this.jumpHeight = jumpHeight;
+        this.jumpHeight = strategy.getJumpHeight();
+        this.gravity = strategy.getGravity();
     }
 
     public void fly() {
-        double movement = -jumpHeight;
-        double currentY = bird.getLayoutY();
-
-        if (currentY <= jumpHeight) {
-            movement = -currentY;
-        }
-
-        moveBirdY(movement);
+        velocity = -jumpHeight;
     }
 
-    /**
-     * @param positionChange
-     */
-    public void moveBirdY(double positionChange) {
-        bird.setLayoutY(bird.getLayoutY() + positionChange);
+    public void applyGravity() {
+        velocity += gravity;
+        bird.setLayoutY(bird.getLayoutY() + velocity);
     }
 
-    /**
-     * @param obstacles
-     * @param plane
-     * @return
-     */
-    public boolean isBirdDead(ArrayList<Rectangle> obstacles, AnchorPane plane){
-        double birdY = bird.getLayoutY() + bird.getY();
+    public boolean isBirdDead(ArrayList<javafx.scene.shape.Rectangle> obstacles, AnchorPane plane) {
+        double birdY = bird.getLayoutY();
+        return collisionHandler.collisionDetection(obstacles, bird) || birdY >= plane.getHeight();
+    }
 
-        if(collisionHandler.collisionDetection(obstacles, bird)){
-            return  true;
-        }
-
-        return birdY >= plane.getHeight();
+    public ImageView getBird() {
+        return bird;
     }
 }
+
+

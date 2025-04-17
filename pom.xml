@@ -49,6 +49,7 @@
 
   <build>
     <plugins>
+      <!-- Maven Assembly Plugin to create a fat JAR -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>3.3.0</version>

@@ -1,14 +1,12 @@
 package hi.flappybird.vidmot;
-import hi.flappybird.vinnsla.BirdMovement;
-import hi.flappybird.vinnsla.ObstaclesHandler;
-import hi.flappybird.vinnsla.SelectedBird;
+import hi.flappybird.vinnsla.*;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.TextField;
 import javafx.application.Platform;
@@ -17,6 +15,9 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import hi.flappybird.vinnsla.FastSpeedStrategy;
+import hi.flappybird.vinnsla.NormalSpeedStrategy;
+
 
 
 public class GameSceneController implements Initializable {
@@ -30,7 +31,7 @@ public class GameSceneController implements Initializable {
     private Label gameOverLabel;
 
     @FXML
-    private Rectangle bird;
+    private Bird activeBird;
 
     @FXML
     private Button restartButton;
@@ -45,6 +46,7 @@ public class GameSceneController implements Initializable {
     private double accelerationTime = 0;
     private int gameTime = 0;
     private int scoreCounter = 0;
+    ImageView bird;
 
     private BirdMovement birdComponent;
     private ObstaclesHandler obstaclesHandler;
@@ -60,25 +62,16 @@ public class GameSceneController implements Initializable {
         String selected = SelectedBird.getSelectedBird();
 
         if ("blue".equals(selected)) {
-            initBlueBird();
+            activeBird = new BlueBird(50, plane.getHeight() / 2);
         } else {
-            initPinkBird();
+            activeBird = new PinkBird(50, plane.getHeight() / 2);
         }
 
-        setupGame();
-    }
-    private void initBlueBird() {
-        bird.setFill(Color.BLUE);
-        bird.setLayoutY(plane.getHeight() / 2);
-        bird.setLayoutX(50);
-        birdComponent = new BirdMovement(bird, 80);
-    }
+        birdComponent = activeBird.getMovement();
+        plane.getChildren().add(activeBird.getShape());
 
-    private void initPinkBird() {
-        bird.setFill(Color.PINK);
-        bird.setLayoutY(plane.getHeight() / 2);
-        bird.setLayoutX(50);
-        birdComponent = new BirdMovement(bird, 60);
+        setupGame();
+
     }
     private void setupGame() {
         double planeHeight = 600;
@@ -98,44 +91,37 @@ public class GameSceneController implements Initializable {
         plane.setFocusTraversable(true);
         Platform.runLater(() -> plane.requestFocus());
     }
-
-
-
-
     /**
      * lætur fuglinn fljúga þegar ýtt er á space
      * @param event
      */
     @FXML
     void pressed(KeyEvent event) {
-        if(event.getCode() == KeyCode.SPACE){
+        if (event.getCode() == KeyCode.SPACE) {
             birdComponent.fly();
-            accelerationTime = 0;
         }
     }
 
-
     private void update() {
         gameTime++;
-        accelerationTime++;
-        double yDelta = 0.02;
-        birdComponent.moveBirdY(yDelta * accelerationTime);
 
-        if(pointChecker(obstacles, bird)){
+        birdComponent.applyGravity(); // use gravity and velocity
+
+        if (pointChecker(obstacles, activeBird.getShape())) {
             scoreCounter++;
             score.setText(String.valueOf(scoreCounter));
         }
 
         obstaclesHandler.moveObstacles(obstacles);
-        if(gameTime % 500 == 0){
+        if (gameTime % 500 == 0) {
             obstacles.addAll(obstaclesHandler.createObstacles());
         }
 
-        if(birdComponent.isBirdDead(obstacles, plane)){
+        if (birdComponent.isBirdDead(obstacles, plane)) {
             gameOver();
         }
-
     }
+
 
     private void load(){
 
@@ -143,7 +129,7 @@ public class GameSceneController implements Initializable {
     }
 
     private void resetGame(){
-        bird.setY(0);
+        activeBird.getShape().setY(0);
         plane.getChildren().removeAll(obstacles);
         obstacles.clear();
         gameTime = 0;
@@ -183,10 +169,7 @@ public class GameSceneController implements Initializable {
         }
     }
 
-
-
-
-    private boolean pointChecker(ArrayList<Rectangle> obstacles, Rectangle bird) {
+    private boolean pointChecker(ArrayList<Rectangle> obstacles, ImageView bird) {
         int birdX = (int) (bird.getLayoutX() + bird.getX());
 
         for (Rectangle obstacle : obstacles) {
