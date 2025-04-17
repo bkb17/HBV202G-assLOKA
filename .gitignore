@@ -45,6 +45,3 @@ build/
 # IntelliJ shelved changes
 .idea/shelf/
 
-# Shell scripts (optional - if you don't want them tracked)
-# build.sh
-# run.sh
