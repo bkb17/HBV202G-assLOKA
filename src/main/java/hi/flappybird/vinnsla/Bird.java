@@ -28,7 +28,7 @@ public abstract class Bird {
         birdView.setFitHeight(BIRD_HEIGHT);
         birdView.setX(locationX);
         birdView.setY(locationY);
-        movement = new BirdMovement(birdView, speedStrategy); // 👈 sameiginlegt!
+        movement = new BirdMovement(birdView, speedStrategy);
         startAnimation();
     }
 

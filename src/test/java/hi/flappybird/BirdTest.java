@@ -1,11 +1,12 @@
 package hi.flappybird;
 
 import javafx.application.Platform;
-import org.junit.jupiter.api.BeforeAll;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.junit.jupiter.api.Test;
 import hi.flappybird.vinnsla.Bird;
+import hi.flappybird.vinnsla.NormalSpeedStrategy;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,17 +14,20 @@ public class BirdTest {
 
     private static boolean javafxInitialized = false;
 
-    // Needed to initialize JavaFX Toolkit
     @BeforeAll
-    public static void initFX() throws Exception {
+    public static void initFX() {
         if (!javafxInitialized) {
             Platform.startup(() -> {});
             javafxInitialized = true;
         }
     }
 
-    // Minimal subclass just to test abstract Bird
+    // Minimal subclass of abstract Bird for testing
     static class TestBird extends Bird {
+        public TestBird(double startX, double startY) {
+            super(startX, startY, new NormalSpeedStrategy());
+        }
+
         @Override
         protected void loadFrames() {
             birdFrames.add(new Image(getClass().getResourceAsStream("/images/pinkbird1.png")));
@@ -33,16 +37,18 @@ public class BirdTest {
 
     @Test
     public void testBirdIsCreated() {
-        Bird bird = new TestBird();
-        assertNotNull(bird.getView());
-        assertEquals(70, bird.getX());
-        assertEquals(200, bird.getY());
+        Bird bird = new TestBird(70, 200);
+        ImageView view = bird.getShape();
+
+        assertNotNull(view);
+        assertEquals(70, view.getX());
+        assertEquals(200, view.getY());
     }
 
     @Test
     public void testSetY() {
-        Bird bird = new TestBird();
-        bird.setY(250);
-        assertEquals(250, bird.getY());
+        Bird bird = new TestBird(70, 200);
+        bird.getShape().setY(250);
+        assertEquals(250, bird.getShape().getY());
     }
 }

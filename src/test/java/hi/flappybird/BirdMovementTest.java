@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import hi.flappybird.vinnsla.BirdMovement;
+import javafx.scene.image.ImageView;
+import hi.flappybird.vinnsla.NormalSpeedStrategy;
 
 
 import java.util.ArrayList;
@@ -16,15 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ApplicationExtension.class)
 public class BirdMovementTest {
 
-    private Rectangle bird;
+    private ImageView bird;
     private BirdMovement birdMovement;
     private AnchorPane plane;
 
     @BeforeEach
     public void setUp() {
-        bird = new Rectangle(20, 20); // simulate a bird shape
+        bird = new ImageView();
+        bird.setFitWidth(34);
+        bird.setFitHeight(24);
         bird.setLayoutY(100); // starting Y position
-        birdMovement = new BirdMovement(bird, 75);
+        birdMovement = new BirdMovement(bird, new NormalSpeedStrategy());
         plane = new AnchorPane();
         plane.setPrefHeight(600); // simulate a game area
     }
