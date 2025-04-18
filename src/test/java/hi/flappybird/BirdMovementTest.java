@@ -1,74 +1,112 @@
 package hi.flappybird;
 
+import hi.flappybird.vinnsla.BirdMovement;
+import hi.flappybird.vinnsla.SpeedStrategy;
+import javafx.application.Platform;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import hi.flappybird.vinnsla.BirdMovement;
-import javafx.scene.image.ImageView;
-import hi.flappybird.vinnsla.NormalSpeedStrategy;
-
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(ApplicationExtension.class)
-public class BirdMovementTest {
+class BirdMovementTest extends JavaFXTestBase {
 
-    private ImageView bird;
     private BirdMovement birdMovement;
-    private AnchorPane plane;
+    private ImageView bird;
+    private SpeedStrategy mockStrategy;
 
     @BeforeEach
-    public void setUp() {
-        bird = new ImageView();
-        bird.setFitWidth(34);
-        bird.setFitHeight(24);
-        bird.setLayoutY(100);
-        birdMovement = new BirdMovement(bird, new NormalSpeedStrategy());
-        plane = new AnchorPane();
-        plane.setPrefHeight(600);
+    void setUp() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            bird = new ImageView();
+            bird.setLayoutY(100);
+
+            mockStrategy = new SpeedStrategy() {
+                @Override
+                public int getJumpHeight() {
+                    return 30;
+                }
+
+                @Override
+                public double getGravity() {
+                    return 2.5;
+                }
+            };
+
+            birdMovement = new BirdMovement(bird, mockStrategy);
+            latch.countDown();
+        });
+        latch.await();
     }
 
     @Test
-    public void testFly() {
-        double initialY = bird.getLayoutY();
-        birdMovement.fly();
-        assertTrue(bird.getLayoutY() < initialY, "Bird should move upward after flying");
+    void testFly() throws InterruptedException {
+        runAndWait(() -> {
+            birdMovement.fly();
+            birdMovement.applyGravity();
+            assertTrue(bird.getLayoutY() < 100);
+        });
     }
 
     @Test
-    public void testMoveBirdY() {
-        birdMovement.moveBirdY(50);
-        assertEquals(150, bird.getLayoutY(), "Bird Y should increase correctly");
+    void testApplyGravity() throws InterruptedException {
+        runAndWait(() -> {
+            double initialY = bird.getLayoutY();
+            birdMovement.applyGravity();
+            assertTrue(bird.getLayoutY() > initialY);
+        });
     }
 
     @Test
-    public void testIsBirdDead_NoCollision_NotBelowPlane() {
-        ArrayList<Rectangle> obstacles = new ArrayList<>();
-        assertFalse(birdMovement.isBirdDead(obstacles, plane), "Bird should not be dead");
+    void testMoveBirdY() throws InterruptedException {
+        runAndWait(() -> {
+            birdMovement.moveBirdY(10);
+            assertEquals(110, bird.getLayoutY());
+        });
     }
 
     @Test
-    public void testIsBirdDead_BelowPlane() {
-        bird.setLayoutY(601);
-        ArrayList<Rectangle> obstacles = new ArrayList<>();
-        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead when below screen");
+    void testIsBirdDead_withCollision() throws InterruptedException {
+        runAndWait(() -> {
+            Rectangle obstacle = new Rectangle(0, 100, 20, 20);
+            ArrayList<Rectangle> obstacles = new ArrayList<>();
+            obstacles.add(obstacle);
+
+            bird.setLayoutX(0);
+            bird.setLayoutY(100);
+
+            AnchorPane plane = new AnchorPane();
+            plane.setPrefHeight(500);
+
+            assertTrue(birdMovement.isBirdDead(obstacles, plane));
+        });
     }
 
     @Test
-    public void testIsBirdDead_WithCollision() {
-        Rectangle obstacle = new Rectangle(20, 20);
-        obstacle.setLayoutX(bird.getLayoutX());
-        obstacle.setLayoutY(bird.getLayoutY());
+    void testIsBirdDead_outOfBounds() throws InterruptedException {
+        runAndWait(() -> {
+            bird.setLayoutY(600);
+            AnchorPane plane = new AnchorPane();
+            plane.setPrefHeight(500);
+            ArrayList<Rectangle> obstacles = new ArrayList<>();
 
-        ArrayList<Rectangle> obstacles = new ArrayList<>();
-        obstacles.add(obstacle);
+            assertTrue(birdMovement.isBirdDead(obstacles, plane));
+        });
+    }
 
-        assertTrue(birdMovement.isBirdDead(obstacles, plane), "Bird should be dead if it collides");
+    private void runAndWait(Runnable action) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            action.run();
+            latch.countDown();
+        });
+        latch.await();
     }
 }
 

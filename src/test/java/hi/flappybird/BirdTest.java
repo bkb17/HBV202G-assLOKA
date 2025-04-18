@@ -1,26 +1,14 @@
 package hi.flappybird;
 
-import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import hi.flappybird.vinnsla.Bird;
 import hi.flappybird.vinnsla.NormalSpeedStrategy;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BirdTest {
-
-    private static boolean javafxInitialized = false;
-
-    @BeforeAll
-    public static void initFX() {
-        if (!javafxInitialized) {
-            Platform.startup(() -> {});
-            javafxInitialized = true;
-        }
-    }
+public class BirdTest extends JavaFXTestBase {
 
     static class TestBird extends Bird {
         public TestBird(double startX, double startY) {
