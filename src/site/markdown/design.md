@@ -1,4 +1,4 @@
 # UML
 
-![UML Diagram](UML.png)
+![UML Diagram](src/site/resources/UML.png)
 
