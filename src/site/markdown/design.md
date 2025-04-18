@@ -1,2 +1,4 @@
-Myndin mín
-![classDiagram](UML.png)
+# UML
+
+![UML Diagram](UML.png)
+

@@ -1,8 +1,17 @@
 <project>
     <body>
-        <menu name="Overview">
-            <item name="Design" href="design.html" />
+        <menu name="Project Documentation">
+            <item name="About" href="index.html"/>
+            <item name="Design" href="design.html"/>
+            <item name="Javadoc" href="testapidocs/index.html"/>
         </menu>
-        <menu ref="reports"/>
+
+        <menu name="Project Reports">
+            <item name="Dependencies" href="dependencies.html"/>
+            <item name="Plugin Management" href="plugin-management.html"/>
+            <item name="Summary" href="summary.html"/>
+        </menu>
     </body>
 </project>
+
+
