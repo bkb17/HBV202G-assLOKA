@@ -14,7 +14,6 @@ public class ObstaclesHandler {
     Random random = new Random();
 
     /**
-     * smiðurinn
      * @param plane
      * @param planeHeight
      * @param planeWidth
@@ -26,7 +25,6 @@ public class ObstaclesHandler {
     }
 
     /**
-     * býr til súlurnar
      * @return
      */
     public ArrayList<Rectangle> createObstacles(){
@@ -49,7 +47,6 @@ public class ObstaclesHandler {
     }
 
     /**
-     * færir súlurnar
      * @param obstacles
      */
     public void moveObstacles(ArrayList<Rectangle> obstacles){
@@ -68,7 +65,6 @@ public class ObstaclesHandler {
     }
 
     /**
-     * færir súlurnar
      * @param rectangle
      * @param amount
      */

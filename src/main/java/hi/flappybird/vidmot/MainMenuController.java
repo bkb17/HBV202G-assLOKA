@@ -7,37 +7,35 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
-/**
- * Controller fyrir main menu
- */
-public class MainMenuController {
 
-    private Stage stage;
-    private Scene scene;
-    private Parent root;
+public class MainMenuController {
 
     /**
      * þegar ýtt er á "PLAY" þá er farið í leikinn
-     * @param event
-     * @throws IOException
      */
     public void switchToGame(ActionEvent event) throws IOException {
-        root = FXMLLoader.load(getClass().getResource("/hi/flappybird/game-scene.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+        switchScene(event, "/hi/flappybird/game-scene.fxml");
     }
 
+    /**
+     * þegar ýtt er á "Birds" þá er hægt að velja fugl
+     */
     @FXML
     private void switchToBirdSelection(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/hi/flappybird/bird-selection.fxml"));
+        switchScene(event, "/hi/flappybird/bird-selection.fxml");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) throws IOException {
+        var url = getClass().getResource(fxmlPath);
+        if (url == null) {
+            throw new RuntimeException("Could not find FXML: " + fxmlPath);
+        }
+
+        Parent root = FXMLLoader.load(url);
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        stage.setScene(new Scene(root));
         stage.show();
     }
 

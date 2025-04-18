@@ -3,6 +3,11 @@ import javafx.scene.image.Image;
 
 
 public class BlueBird extends Bird {
+
+    /**
+     * @param startX
+     * @param startY
+     */
     public BlueBird(double startX, double startY) {
         super(startX, startY, new FastSpeedStrategy());
     }

@@ -1,4 +1,5 @@
 package hi.flappybird.vinnsla;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.image.Image;
@@ -18,7 +19,13 @@ public abstract class Bird {
     protected int BIRD_WIDTH = 50;
     protected int BIRD_HEIGHT = 45;
     private Timeline animation;
+    private SpeedStrategy speedStrategy;
 
+    /**
+     * @param startX
+     * @param startY
+     * @param speedStrategy
+     */
     public Bird(double startX, double startY, SpeedStrategy speedStrategy) {
         locationX = startX;
         locationY = startY;
@@ -30,6 +37,7 @@ public abstract class Bird {
         birdView.setY(locationY);
         movement = new BirdMovement(birdView, speedStrategy);
         startAnimation();
+        this.speedStrategy = speedStrategy;
     }
 
     protected abstract void loadFrames();
@@ -50,5 +58,14 @@ public abstract class Bird {
     public ImageView getShape() {
         return birdView;
     }
+
+    public List<Image> getBirdFrames() {
+        return birdFrames;
+    }
+
+    public SpeedStrategy getSpeedStrategy() {
+        return speedStrategy;
+    }
+
 }
 
