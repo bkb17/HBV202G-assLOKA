@@ -29,7 +29,7 @@ Hægt er að keyra forritið án IntelliJ eða annars IDE með fat JAR sem innih
 - ATH: Þar sem JavaFX fylgir ekki sjálfkrafa með Java, þarf að vísa í JavaFX SDK með --module-path. Það er gert sjálfkrafa í build.sh skriptunni svo þú þarft ekki að stilla neitt sjálfur.
 
 ## Möppuskipan 
-src/
+<pre> ``` src/
 ├── main/
 │   ├── java/
 │   │   └── hi/
@@ -77,7 +77,7 @@ src/
 📄 pom.xml
 📄 build.sh
 📄 run.sh
-📄 README.md
+📄 README.md ``` </pre>
 
 
 ## Skráalýsing
