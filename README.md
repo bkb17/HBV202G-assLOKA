@@ -1,40 +1,84 @@
 # Flappy Bird í JavaFX
-Þetta er einföld útgáfa af Flappy Bird leiknum, forrituð í Java með JavaFX. Leikmaður stýrir fugli með því að ýta á spacebar og þarf að fljúga á milli hindrana án þess að rekast á þær. Verkefnið var unnið sem demo í forritun.
+Þetta er einföld útgáfa af Flappy Bird leiknum, forrituð í Java með JavaFX. Leikmaður stýrir fugli með því að ýta á spacebar og þarf að fljúga á milli hindrana án þess að rekast á þær. Verkefnið var unnið sem lokaverkefni í áfanganum Viðmótsforritun við Háskóla Íslands.
 
-Leikurinn byggir á einföldum leikreglum: fuglinn flýgur upp þegar ýtt er á spacebar og fellur að sjálfu sér niður. Leikmaður þarf að forðast að klessa á hindranir eða jörðina. Ef það gerist kemur Game Over skjár og leikmaður getur annað hvort byrjað upp á nýtt eða farið aftur í menu (aðalvalmynd).
+Leikurinn byggir á einföldum leikreglum: fuglinn flýgur upp þegar ýtt er á spacebar og fellur að sjálfu sér niður. Leikmaður þarf að forðast að rekast á hindranir eða jörðina. Ef það gerist birtist „Game Over“ skjár með möguleika á að byrja upp á nýtt eða fara aftur í main menu.
 
 ## Eiginleikar
-Fuglinn hoppar með því að ýta á bilslána
+Fuglinn hoppar með því að ýta á spacebar
 Hindranir færast frá hægri til vinstri
 Stig eru reiknuð þegar fuglinn fer framhjá pípu
-Game Over skjár birtist þegar leik lýkur
+"Game Over" skjár birtist þegar leik lýkur
 Möguleiki á að byrja leikinn aftur eða fara í menu
-Uppsetning og keyrsla
-Opnaðu verkefnið í IntelliJ IDEA eða öðrum IDE með JavaFX stuðningi
-Keyrðu skrána FlappyBirdApplication.java
-Leikurinn opnast og byrjar í menu
-Maven uppsetning og keyrsla
-Opnaðu terminal eða skipanalínu í verkefnismöppunni
+Val á fugli (blár eða bleikur fugl)
 
-## Keyrðu eftirfarandi til að sækja dependency og byggja verkefnið:
-mvn clean install
+## Uppsetning og keyrsla
+1. Opnaðu verkefnið í IntelliJ IDEA eða öðrum IDE með JavaFX stuðningi
+2. Keyrðu FlappyBirdApplication.java
+3. Eða keyrðu í gegnum Maven með eftirfarandi skipunum í terminal:
 
-## Til að keyra leikinn með JavaFX Maven plugin:
-mvn javafx:run
-Þú þarft að vera með Maven uppsett í tölvunni.
+- mvn clean install
+- mvn javafx:run
+- mvn exec:java
 
-## Möppuskipan
+## Keyrsla án IDE
+Hægt er að keyra forritið án IntelliJ eða annars IDE með fat JAR sem inniheldur öll dependencies:
+1. Búðu til jar-with-dependencies með:
+- mvn clean package
+2. Keyrðu FlappyBird með skelsskriftunni:
+- ./build.sh
+- ATH: Þar sem JavaFX fylgir ekki sjálfkrafa með Java, þarf að vísa í JavaFX SDK með --module-path. Það er gert sjálfkrafa í build.sh skriptunni svo þú þarft ekki að stilla neitt sjálfur.
+
+## Möppuskipan 
 src/
-hi/
-   flappybird/
-        BirdMovement.java
-        CollisionHandler.java
-        FlappyBirdApplication.java
-        GameSceneController.java
-        MainMenuController.java
-        ObstaclesHandler.java
-        game-scene.fxml
-        main-menu.fxml
+├── main/
+│   ├── java/
+│   │   └── hi/
+│   │       └── flappybird/
+│   │           ├── vidmot/
+│   │           │   ├── BirdSelectionController.java
+│   │           │   ├── FlappyBirdApplication.java
+│   │           │   ├── GameSceneController.java
+│   │           │   └── MainMenuController.java
+│   │           └── vinnsla/
+│   │               ├── Bird.java
+│   │               ├── BirdMovement.java
+│   │               ├── BlueBird.java
+│   │               ├── CollisionHandler.java
+│   │               ├── FastSpeedStrategy.java
+│   │               ├── NormalSpeedStrategy.java
+│   │               ├── ObstaclesHandler.java
+│   │               ├── PinkBird.java
+│   │               ├── SelectedBird.java
+│   │               └── SpeedStrategy.java
+│   ├── resources/
+│   │   └── hi/
+│   │       └── flappybird/
+│   │           ├── bird-selection.fxml
+│   │           ├── game-scene.fxml
+│   │           ├── main-menu.fxml
+│   │           ├── images/
+│   │           └── ├── pinkbird1.png
+│   │               ├── pinkbird2.png
+│   │               └── ...
+│   │           
+│   └── module-info.java
+├── test/
+│   └── java/
+│       └── hi/
+│           └── flappybird/
+│               ├── BirdMovementTest.java
+│               ├── BirdTest.java
+│               ├── BlueBirdTest.java
+│               ├── CollisionHandlerTest.java
+│               ├── JavaFXTestBase.java
+│               ├── ObstaclesHandlerTest.java
+│               ├── PinkBirdTest.java
+│               └── SelectedBirdTest.java
+📄 pom.xml
+📄 build.sh
+📄 run.sh
+📄 README.md
+
 
 ## Skráalýsing
 FlappyBirdApplication.java – Byrjar leikinn og opnar menu
@@ -43,22 +87,25 @@ MainMenuController.java – Stýrir menu og PLAY hnappi
 ObstaclesHandler.java – Býr til og hreyfir hindranir
 BirdMovement.java – Heldur utan um hreyfingu fuglsins
 CollisionHandler.java – Athugar hvort fugl rekst á hindrun
-game-scene.fxml – FXML útlit fyrir leikinn
-main-menu.fxml – FXML útlit fyrir menu
+ObstaclesHandler.java - Býr til og hreyfir hindranir
+.fxml skrár - Skilgreina útlit (UI) fyrir leik og main menu
 
 ## Kröfur
 OpenJDK 23
-JavaFX með Maven
+Maven
+JavaFX (með maven)
 Höfundar
 Nafn: Stefanía Guðrún Harðardóttir og Brynja Kristín Bertelsdóttir
-Skóli: Háskóli Íslands
-Áfangi: Viðmótsforritun vor 2025 lokaverkefni
+Áfangi: Viðmótsforritun, vor 2025 lokaverkefni, Háskóli Íslands
 
 ## Licence
 [Licence](/Users/brynja.kristin/IdeaProjects/HBV202G-assLOKA/LICENCE)
 
 ## Design
-[Design](/Users/brynja.kristin/IdeaProjects/HBV202G-assLOKA/src/site/markdown/UML.png)
+[Design](src/site/resources/UML.png)
 
 ## Staða verkefnis
-Verkefnið er tilbúið sem demo. Leikurinn virkar, stig eru talin rétt og viðmótið birtir valkosti við leikslok. Í framtíðinni væri hægt að bæta við PNG mynd fyrir fuglinn, hljóðum, þema í main menu, high score og fleira.
+Verkefnið er tilbúið sem demo. Leikurinn virkar, stig eru talin rétt og viðmótið birtir valkosti við leikslok. Í framtíðinni væri hægt að bæta við:  
+- hljóðum og bakgrunnstónlist
+- Þemum til að velja úr
+- high score
