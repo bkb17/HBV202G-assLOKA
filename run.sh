@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Running Flappy Bird JavaFX game..."
+echo "Running Flappy Bird JavaFX game..."
 
 java \
 --module-path "/Users/brynja.kristin/Downloads/javafx-sdk-24.0.1/lib" \
